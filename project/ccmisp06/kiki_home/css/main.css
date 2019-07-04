@@ -1,0 +1,90 @@
+* {min-height:1px;}
+body {border:0; margin:0; padding:0; background:#F2F5FE url("../design/bg.gif") 0 0 repeat-x; font:70%/160% "verdana",sans-serif; color:#192666;}
+
+a {color:#6685CC;}
+a:hover {color:#4F6AD7;}
+
+div {display:block; border:0; margin:0; padding:0;}
+legend{font-size:15px;margin-left:10px;background:#fff;}
+fieldset{/* width:420px; */margin-top:10px;padding-bottom:7px;border:#06c dashed 1px;}
+table {width:490px;border-collapse:collapse; margin-top:10px; border:1px solid #B7CAF6; font-size:100%;}
+tr {display:table-row;font-size:15px;}
+td {display: table-cell; border:1px solid #B7CAF6; margin:0; padding:5px; vertical-align:top; text-align:left;}
+.td_right a{color:#FF9000;font-weight:bold;}
+.box {min-height:1px;margin: 0 auto; text-align:left; }
+.box:after {content:"."; display:block; line-height:0px; font-size:0px; visibility:hidden; clear:both;}
+
+#main 
+{
+	width: 736px;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#main2 {
+border: 6px solid #192666;
+color:#192666;
+}
+
+#head {
+width: 724px;
+height: 120px;
+background-image: url("../design/8.png");
+background-repeat:no-repeat;
+}
+
+#head h1 {
+text-align: center;
+padding-top: 50px;
+margin: 0px;
+font-size: 28px;
+color: #444444;
+text-decoration: underline;
+}
+
+#header 
+{
+	position:relative; 
+	width:570px; 
+	height:16px; 
+	margin-top:5px; 
+	padding:0; 
+	background:#233C9B url("../design/header.jpg") 0 0 no-repeat; 
+	color:#FFF;
+}
+
+#page {width:570px; min-height:1px; background:#FFF url("../design/bg_page1.gif") 0 0 repeat-y;}
+#page-in {min-height:1px; padding:10px 0;}
+
+#content {float:left; width:530px; margin:0; padding:0 0 0 20px;}
+
+    #content .article {clear:both; margin:0; padding:20px; background:url("../design/content_article_bg.jpg") 0 0 no-repeat;}
+    #content .article h2 {margin:0 -20px; padding:10px; background:#DEE5FD url("../design/content_title_bg.gif") 0 0 repeat-y; color:#192666;font-size:180%;}
+    #content .article h2 span {background:url("../design/ico_list.gif") 0 50% no-repeat; padding-left:25px;}
+
+#footer {position:relative; clear:both; width:570px; height:21px; margin-bottom:5px; background:url("../design/footer2.jpg") 0 0 no-repeat; color:#6685CC;}
+
+#foot 
+{
+	margin: 5px 0 10px;
+	text-align: center;
+	font-family: sans;
+	font-size: 14px;
+	color: #192666;
+}
+
+#foot a {text-decoration: none;}
+#foot a:hover {text-decoration: underline;}
+
+/* Main menu (tabs) */
+#tabs {background:#192666; padding:5px 0 0;font-size:16px;line-height:25px;}
+
+    #tabs ul {margin:0 10px; padding:0; list-style:none;}
+    #tabs ul li {margin:0 5px 0 0; padding:0; float:left;}
+    #tabs ul li a {display:block; position:relative; padding:7px 15px; border:0; background:url("../design/tab_link.gif") 0 0 repeat-x; color:#192666; font-weight:bold; text-decoration:none; cursor:pointer;}
+    
+    /* Main menu (tabs - active) */
+    #tabs ul li#active a {background:#FFF; }
+    #tabs ul li#active a span.tab-l {position:absolute; top:0; left:0; width:8px; height:8px; background:url("../design/tab_active_l.gif") 0 0 no-repeat;}
+    #tabs ul li#active a span.tab-r {position:absolute; top:0; right:0; width:8px; height:8px; background:url("../design/tab_active_r.gif") 100% 0 no-repeat;}

@@ -1,0 +1,403 @@
+#!/usr/local/bin/perl 
+####################################################
+#                                                  #
+#  本程式提供科目異動使用                          #
+#  program by ionic     			   #
+#                                                  #
+#  本程式將科目異動資料記錄在 Change.Log           #
+#  Change.Log將在其他的異動程式中使用到            #
+#                                                  #
+####################################################
+## 異動 $flag   0 : course canceled
+##              1 : course added
+##              2 : period change
+##              3 : classroom change
+##              4 : 時數
+##              5 : 科目屬性
+##              6 : 教師
+##              7 : 支援系所     --> 取消
+##              8 : 限修系所(ban)  --> 取消
+##              9 : 備註欄       --> 取消
+
+require "../../library/Reference.pm";
+require $LIBRARY_PATH."Dept.pm";
+require $LIBRARY_PATH."Student_Course.pm";
+require $LIBRARY_PATH."Course.pm";
+require $LIBRARY_PATH."Student.pm";
+require $LIBRARY_PATH."Teacher.pm";
+require $LIBRARY_PATH."Classroom.pm";
+
+$week_string="日/一/二/三/四/五/六/日";
+$time_string="A/1/2/3/4/F/B/5/6/7/8/C/D/E";
+
+@Teachers= Read_Teacher_File();
+@Dept = Find_All_Dept();
+
+my($count,$old_count,$i,$j,$flag);
+
+Write_HTML_File_Header();
+
+foreach $dept(@Dept)
+{
+ @Course = Find_All_Course($dept,"","");
+ @Old_Course = Find_All_Course($dept,"","old");
+ $count=@Course;
+ $old_count = @Old_Course;
+ ## 檢查 canceled courses ##
+ for($i=0;$i < $old_count;$i++)
+ {
+  for($j=0,$flag=0;$j < $count; $j++)
+  {
+   if($Old_Course[$i]{id} eq $Course[$j]{id}
+   && $Old_Course[$i]{group} eq $Course[$j]{group} )
+   { $flag=1; break; }
+  }
+  if( $flag == 0 )    ## 科目已經取消
+  {
+   Log($dept,$Old_Course[$i]{id},$Old_Course[$i]{group},0);
+   %log_course =Read_Course($dept,$Old_Course[$i]{id},$Old_Course[$i]{group},"old");
+   Log2($dept,"C");
+  }
+ }
+ 
+ 
+ for($i=0;$i < $count;$i++)
+ {
+  ## 檢查是否為新增科目
+  for($j=0,$flag=0;$j < $old_count; $j++)
+  {
+   if( $Course[$i]{id} eq $Old_Course[$j]{id} 
+    && $Course[$i]{group} eq $Old_Course[$j]{group} )
+   { 
+    $flag=1; break;
+   }
+  }
+  $j--;
+  if($flag == 1)  ## 非新增之科目...檢查其他異動項目
+  {
+   %course= Read_Course( $dept,$Course[$i]{id},$Course[$i]{group},"");
+   %old_course = Read_Course($dept,$Course[$i]{id},$Course[$i]{group},"old");
+   %log_course = %old_course;
+  $U_teacher="";
+  $U_property="";
+  $U_classtime="";
+  $U_classroom="";
+  my($check);
+  $check=0;
+   $check+=CheckPeriod();
+   $check+=CheckClassroom();
+   CheckTime();
+   $check+=CheckProperty();
+   $check+=CheckTeacher();
+#   CheckSupport();
+#   CheckBan();
+#   CheckNote();
+   if($check !=0)
+   {
+    Log2($dept,"U",$U_teacher,$U_property,$U_classtime,$U_classroom);
+   }
+  }
+  else  ## 代表為新增之科目
+  {     ## 將新增科目記錄下來
+   Log($dept,$Course[$i]{id},$Course[$i]{group},1);
+   %log_course=Read_Course($dept,$Course[$i]{id},$Course[$i]{group});
+   Log2($dept,"A");
+  }
+ }
+}
+Write_HTML_File_Tail();
+#################################################################################
+
+sub Write_HTML_File_Header()
+{
+  $html_file_name = $WWW_PATH . "Update_Course.html";
+  open(HTML, ">$html_file_name") or die("Cannot open file >$html_file_name!\n");
+  print HTML qq(
+    <HTML><HEAD><TITLE>檢視所有異動科目</TITLE></HEAD>
+      <BODY background="$GRAPH_URL/ccu-sbg.jpg">
+        <CENTER><H1>檢視所有異動科目</H1>
+        <table width=800 border=1>
+          <tr><th bgcolor=#ffff00><font size=1>系所別</font></th>
+              <th bgcolor=#ffff00><font size=1>科目代碼</font></th>
+              <th bgcolor=#ffff00><font size=1>班別</font></th>
+              <th bgcolor=#ffff00><font size=1>科目名稱</font></th>
+              <th bgcolor=#ffff00><font size=1>教師</font></th>
+              <th bgcolor=#ffff00><font size=1>上課時數</font></th>
+              <th bgcolor=#ffff00><font size=1>學分</font></th>
+              <th bgcolor=#ffff00><font size=1>選必</font></th>
+              <th bgcolor=#ffff00><font size=1>時間</font></th>
+              <th bgcolor=#ffff00><font size=1>地點</font></th>
+              <th bgcolor=orange><font size=1>增|異|取消</font></th>
+              <th bgcolor=orange><font size=1>教師</font></th>
+              <th bgcolor=orange><font size=1>選必</font></th>
+              <th bgcolor=orange><font size=1>時間</font></th>
+              <th bgcolor=orange><font size=1>地點</font></th>
+      </tr>
+  );
+}
+#################################################################################
+sub Write_HTML_File_Tail() 
+{
+  print HTML qq(
+    </TABLE>
+  );
+}
+
+#################################################################################
+sub Log
+{
+ my($dept,$id,$group,$flag);
+ ($dept,$id,$group,$flag)=@_;
+ open(LOG,">>Change.Log");
+  print LOG "$dept $id $group $flag\n";
+ close(LOG);
+}
+
+sub CheckPeriod
+{
+ my($i,$j,$flag,$found);
+ $flag =0;
+
+ ## 如果時數改變則上課時間肯定改變
+ if( $course{total_time} ne $old_course{total_time} )
+ { $flag = 1; }
+
+ 
+ for($i=0;$i<$course{total_time} && $flag!=1;$i++)
+ {
+  $found=0;
+  for($j=0;$j<$course{total_time};$j++)
+  {
+   if( ($course{time}[$i]{week} eq $old_course{time}[$j]{week}) 
+    && ($course{time}[$i]{time} eq $old_course{time}[$j]{time}) )
+   { $found =1; }
+  }
+  
+  ## $found==0 代表 $course{time}[$i]找不到相同的$old_course{time}[$j]
+  if($found != 1)
+  {
+   $flag=1;
+  # Log($dept,$course{id},$course{group},2);
+  # return; 
+  }
+ }
+ if( $flag == 1 )
+ {
+  Log($dept,$course{id},$course{group},2);
+  for($i=0;$i<$course{total_time};$i++)
+  {
+   $U_classtime=$U_classtime.(split("/", $week_string))[$course{time}[$i]{week}];
+   $U_classtime=$U_classtime.(split("/", $time_string))[$course{time}[$i]{time}];  
+  }
+  return 1;
+ }
+ return 0;
+}
+
+sub CheckClassroom
+{
+  my(%classroom);
+ if($course{classroom} ne $old_course{classroom})
+ { 
+   Log($dept,$course{id},$course{group},3);
+   %classroom = Read_Classroom($course{classroom});
+    $U_classroom = $classroom{cname}; 
+   return 1;
+ }
+ return 0;
+}
+
+sub CheckTime
+{
+ if( $course{total_time} ne $old_course{total_time})
+ {
+  Log($dept,$course{id},$course{group},4); 
+ }
+}
+
+sub CheckProperty
+{
+ if( $course{property} ne $old_course{property} )
+ {
+  Log($dept,$course{id},$course{group},5);
+  $U_property = $course{property};
+  return 1;
+ }
+ return 0;
+}
+
+sub CheckTeacher
+{
+ my($i,$j,$count1,$count2,$flag,$found);
+ $count1 = @{$course{teacher}};
+ $count2 = @{$old_course{teacher}};
+ if($count1 ne $count2) 
+ { $flag =1; }
+ for($i=0;$i<$count1 && $flag!=1;$i++)
+ {
+  $found=0;
+  for($j=0;$j<$count1;$j++)
+  {
+   if($course{teacher}[$i] eq $old_course{teacher}[$j])
+   { $found=1; break; }
+  }
+  if($found==0)
+  {
+   $flag=1;
+  }
+ }
+ if($flag==1)
+ {
+  Log($dept,$course{id},$course{group},6);
+  for($i=0;$i<$count1;$i++)
+  {
+   $U_teacher=$U_teacher.$Teacher_Name{$course{teacher}[$i]}." ";
+  }
+  return 1;
+ }
+ return 0;
+}
+
+sub CheckSupport
+{
+ my($i,$j,$count1,$count2,$flag,$found);
+ $count1 = $course{support_dept};
+ $count2 = $old_course{support_dept};
+ if($count1 ne $count2) 
+ { $flag =1; }
+ for($i=0;$i<$count1 && $flag!=1;$i++)
+ {
+  $found=0;
+  for($j=0;$j<$count1;$j++)
+  {
+   if($course{support_dept}[$i] eq $old_course{support_dept}[$j])
+   { $found=1; break; }
+  }
+  if($found==0)
+  {
+   $flag=1;
+  }
+ }
+ if($flag==1)
+ {
+  Log($dept,$course{id},$course{group},7);
+ }
+}
+
+sub CheckBan
+{
+ my($i,$j,$count1,$count2,$flag,$found);
+ $count1 = $course{ban_dept};
+ $count2 = $old_course{ban_dept};
+ if($count1 ne $count2) 
+ { $flag =1; }
+ for($i=0;$i<$count1 && $flag!=1;$i++)
+ {
+  $found=0;
+  for($j=0;$j<$count1;$j++)
+  {
+   if($course{ban_dept}[$i] eq $old_course{ban_dept}[$j])
+   { $found=1; break; }
+  }
+  if($found==0)
+  {
+   $flag=1;
+  }
+ }
+ if($flag==1)
+ {
+  Log($dept,$course{id},$course{group},8);
+ }
+}
+
+sub Log2
+{
+ my($dept,$flag,$teachers,$property,$classtime,$classroom,%classroom,$teacher_string);
+ my($teacher_count,$i,@property_string,$output_string,@temp,$classtime_string);
+ $property_string[0]="";
+ $property_string[1]="必修";
+ $property_string[2]="選修";
+ $property_string[3]="通識";
+ 
+ ($dept,$flag,$teachers,$property,$classtime,$classroom)=@_;
+ %classroom = Read_Classroom( $log_course{classroom} );
+# $teacher_string = Make_Teacher_String( @{$log_course{teacher}} );
+ $teacher_count = @{$log_course{teacher}};
+ for($i=0;$i<$teacher_count;$i++)
+ {
+#  print "log_course{teacher}[$i]=$log_course{teacher}[$i]\n";
+  $teacher_string=$teacher_string.$Teacher_Name{$log_course{teacher}[$i]}." ";
+ }
+ 
+ for($i=0;$i<$log_course{total_time};$i++)
+ {
+  $classtime_string=$classtime_string.(split("/", $week_string))[$log_course{time}[$i]{week}];
+  $classtime_string=$classtime_string.(split("/", $time_string))[$log_course{time}[$i]{time}];  
+ }
+ open(LOG,">>Output");
+
+ $output_string=sprintf("%4s%1sA%7s%2s%-60s%-100s%1s%1s%4s%-18s%-30s%1s%-100s%4s%-18s%-30s\n",
+  $dept,$log_course{grade},$log_course{id},$log_course{group},
+  $log_course{cname},$teacher_string,$log_course{total_time},
+  $log_course{credit},$property_string[$log_course{property}],
+  $classtime_string,$classroom{cname},$flag,$teachers,
+  $property_string[$property],$classtime,$classroom);
+  print LOG $output_string;
+ close(LOG);
+
+ open(LOG2,">>Output2");
+ $output_string=sprintf("%s###%sA###%s###%s###%s###%s###%s###%s###%s###%s###%s###%s###%s###%s###%s###%s\n",
+  $dept,$log_course{grade},$log_course{id},$log_course{group},
+  $log_course{cname},$teacher_string,$log_course{total_time},
+  $log_course{credit},$property_string[$log_course{property}],
+  $classtime_string,$classroom{cname},$flag,$teachers,
+  $property_string[$property],$classtime,$classroom);
+  print LOG2 $output_string; 
+ close(LOG2);
+
+# if( $flag eq "C" ) {
+#   %course = Read_Course($dept, $log_course{id}, $log_course{group}, "old","");
+# }else{
+   %course = Read_Course($dept, $log_course{id}, $log_course{group}, "", "");
+# }
+
+  %temp_old_course = Read_Course($dept, $log_course{id}, $log_course{group}, "old","");
+
+ %dept = Read_Dept($dept);
+ if($course{cname} eq "") {
+   $course{cname} = $temp_old_course{cname};
+ }
+ %flag_meaning = ("C", "取消", "U", "異動", "A", "新開");
+ print HTML qq(
+   <TR><TD><font size=1>$dept{cname2}$log_course{grade}</TD>
+       <TD><font size=1>$log_course{id}</TD>
+       <TD><font size=1>$log_course{group}</TD>
+       <TD><font size=1>$course{cname}</TD>
+       <TD><font size=1>$teacher_string</TD>
+       <TD><font size=1>$log_course{total_time}</TD>
+       <TD><font size=1>$log_course{credit}</TD>
+       <TD><font size=1>$property_string[$log_course{property}]</TD>
+       <TD><font size=1>$classtime_string</TD>
+       <TD><font size=1>$classroom{cname}</TD>
+       <TD><font size=1>$flag_meaning{$flag}</TD>
+       <TD><font size=1>$teachers&nbsp;</TD>
+       <TD><font size=1>$property_string[$property]&nbsp;</TD>
+       <TD><font size=1>$classtime&nbsp;</TD>
+       <TD><font size=1>$classroom&nbsp;</TD>
+    </TR>
+ );
+}
+
+sub Make_Teacher_String
+{
+ my($string,$no,@teachers,$i);
+ @teachers = @_;
+ $no = @_;
+ for($i=0;$i < $no; $i++)
+ {
+  print "teacher[$i]=$teacher[$i]\n";
+  $string+=$Teacher_Name{$teachers[$i]};
+  $string+=" ";
+ }
+ return $string;
+}

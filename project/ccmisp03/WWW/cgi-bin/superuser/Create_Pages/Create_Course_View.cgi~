@@ -1,0 +1,395 @@
+#!/usr/local/bin/perl
+
+#############################################################################
+#####     Create_Course_View
+#####  由目前開課資料產生課程資料HTML檔, 供學生查詢
+#####  需要資料: 開課資料
+#####  輸出資料: 選擇系所的HTML檔 * 1
+#####            各個系所的開課資料HTML檔 * n
+#####  Coder   : Nidalap
+#####  Date    : May 31, 2000
+#####  Update  : May 15, 2001
+#####		 2007/06/22 加入自動 tgz 檔案, 並且放入 zipfiles/ 目錄
+#####		 2008/05/30 加入學程科目連結 -> class_new/Show_All_GRO.cgi
+#####            2008/06/03 將學程視為一個學院, 加在最右側
+#####		 2008/08/05 增加 Ecourse 課程大綱連結
+#############################################################################
+
+$| = 0;
+require "../../../../LIB/Reference.pm";
+require $LIBRARY_PATH . "Common_Utility.pm";
+require $LIBRARY_PATH . "Dept.pm";
+require $LIBRARY_PATH . "Course.pm";
+require $LIBRARY_PATH . "Teacher.pm";
+require $LIBRARY_PATH . "Classroom.pm";
+require $LIBRARY_PATH . "Error_Message.pm";
+
+Read_GRO();
+$HTML_PATH = $WWW_PATH . "Course/";        ### 產生的HTML要放在這個目錄
+$fn1 = "<FONT size=3>";
+$fn2 = "<FONT size=2>";
+@dept = Find_All_Dept();
+
+print("Content-type:text/html\n\n");
+print("產生開課資料查詢網頁\n");
+print("產生的網頁會放在: $HTML_PATH 下\n");
+print("  正在產生以下網頁:\n index.html");
+
+foreach $dept (@dept) {
+  $dept =~ /^(.)/;
+  $changeline = $1;
+  if( $old_changeline != $changeline ) {
+    $old_changeline = $changeline;
+    print("\n");
+  }
+  print(" $dept");
+  $exists{$dept} = Create_Dept_Course_HTML($dept);
+}
+Create_Index_HTML(%exists);
+
+#$exec_string = "lynx -reload -traversal -dump " . $HOME_URL . "Course/index.html";
+#print("\n正在執行 $exec_string...\n");
+#system($exec_string);
+$zipfile_name = $YEAR . $TERM . ".tgz";
+$exec_string = "sync; cd " . $WWW_PATH . "Course/;  tar cfz zipfiles/" . $zipfile_name . " *.html";
+print("正在執行 $exec_string...\n");
+system($exec_string);
+
+$exec_string = "lynx -reload -traversal -dump " . $HOME_URL . "Course/index.html";
+print("\n正在執行 $exec_string...\n");
+system($exec_string);
+
+print("網頁產生完畢!\n");
+############################################################################
+sub Create_Index_HTML()
+{
+  my(%exists) = @_;		### 某系是否有開課的 flag
+
+  mkdir($HTML_PATH, 0755)  if( not -e $HTML_PATH );
+  $index_file = $HTML_PATH . "index.html";
+  open(INDEX, ">$index_file") or die("Cannot create index file $index_file!\n");
+  
+  print INDEX qq(
+    <HTML>
+      <HEAD>
+        <meta http-equiv="Content-Type" content="text/html; charset=big5">
+        <META HTTP-EQUIV="Pragma" CONTENT="NO-CACHE">
+        <META HTTP-EQUIV="expires" CONTENT="-1">
+        <TITLE>國立中正大學$SUB_SYSTEM_NAME開排選課系統 $YEAR學年度第$TERM學期課程表</TITLE>
+      </HEAD>
+      <BODY background="$GRAPH_URL/bk.jpg">
+        <CENTER><H1><FONT face="標楷體">
+          國立中正大學$SUB_SYSTEM_NAME開排選課系統<BR>
+          $YEAR學年度$TERM_NAME課程表</FONT></H1>
+        <HR>
+  );
+  $dept_table = Dept_Table(%exists);
+  print INDEX $dept_table;
+  %time = gettime();
+  ($year_last, $term_last) = Last_Semester(1);
+  $zipfile	= "zipfiles/" . $YEAR . $TERM . ".tgz";
+  $zipfile_last	= "zipfiles/" . $year_last . $term_last . ".tgz";
+  print INDEX qq(
+    <P>
+    <center>
+      <FONT color=GREEN size=-1>
+        <LI>本課程表僅供查詢當學期開課資料用, 若要選課請使用<A href="http://kiki.ccu.edu.tw/">選課系統</A>.
+        <LI>這裡的資料是 [$time{time_string}] 產生的, 科目異動或新舊學期交替期間, 可能會出現舊資料, 可按 Ctrl + F5 重新讀取以更新資訊.
+      </FONT>
+      <BR>
+      <FONT size=+1>
+        [
+          <A href="$CGI_URL/Query/Query_by_time1.cgi">進階開課資料查詢</A> |
+          <A href="$CLASS_URL/Show_All_GRO.cgi">所有跨領域學程</A> |
+          <A href="$HOME_URL/Update_Course.html">檢視所有異動科目</A>
+        ]
+        <BR>
+        </FONT><FONT size=-1>
+        [
+          開課資料壓縮檔下載: 
+          <A href="$zipfile">本學期</A> | 
+          <A href="$zipfile_last">上學期</A> |
+          <A href="zipfiles/">其他學期(檔案名稱是學年學期)</A>
+        ]
+    </center>
+  );
+  close(INDEX);
+}
+############################################################################
+sub Create_Dept_Course_HTML()
+{
+  ($dept) = @_;
+  my $exists;				## 回傳本系是否有開課資料的 flag
+  $html_file = $HTML_PATH . $dept . ".html";
+  open(HTML, ">$html_file") or die("Cannot create index file $html_file!\n");
+
+  @course = Find_All_Course($dept, "", "");
+  $exists = @course;
+  %dept = Read_Dept($dept);
+  %time = gettime();
+  print HTML qq(
+    <HTML>
+      <HEAD>
+        <meta http-equiv="Content-Type" content="text/html; charset=big5">    
+        <META HTTP-EQUIV="Pragma" CONTENT="NO-CACHE">                
+        <META HTTP-EQUIV="expires" CONTENT="-1">
+        <TITLE>國立中正大學$SUB_SYSTEM_NAME開排選課系統 $YEAR學年度第$TERM學期課程表--$dept{cname}</TITLE>
+      </HEAD>
+      <BODY background="$GRAPH_URL/bk3.jpg">
+      <CENTER><H1><FONT face="標楷體">
+         國立中正大學$SUB_SYSTEM_NAME開排選課系統<BR>
+         $YEAR學年度$TERM_NAME  課程表<BR>
+         系所別: $dept{cname}</FONT></H1>
+      <HR>
+      <FONT size=-1><A href="http://kiki.ccu.edu.tw/ccu_timetable.doc" target=NEW>上課時間表</A><BR>
+      這裡的資料是 [$time{time_string}] 產生的, 科目異動或新舊學期交替期間, 可能會出現舊資料, 可按 Ctrl 重新讀取以更新資訊. </FONT>
+      <TABLE border=1>
+        <TR bgcolor=YELLOW>
+            <TH>$fn1年級</TH><TH>$fn1編號</TH>
+            <TH>$fn1班別</TH><TH>$fn1科目名稱</TH>
+            <TH>$fn1任課教授</TH><TH>$fn1上課時數<BR>正課/實驗實習/書報討論</TH>
+            <TH>$fn1學分</TH><TH>$fn1選必</TH>
+            <TH>$fn1上課時間</TH><TH>$fn1上課地點</TH>
+            <TH>$fn1限修人數</TH>
+            <TH>$fn1課程大綱</TH>
+            <TH>$fn1備註</TH>
+        </TR>
+  );
+  foreach $course (@course) {
+#    print("$dept -> $$course{id}, $$course{group}\n");
+    %course = Read_Course($dept, $$course{id}, $$course{group}, "", "產生開課資料HTML");
+    @bgcolor = ("", "#F4B780", "#D39F71", "#C09067", "#AE8662");
+    %classroom = Read_Classroom($course{classroom});
+    $teacher_string = "";
+    foreach $t (@{$course{teacher}}) {
+      Read_Teacher_File();
+      $teacher_string .= $Teacher_Name{$t};
+      $teacher_string .= " ";
+    }
+    my $time_string = "";
+    $time_string = Format_Time_String($course{time});
+    
+    my $link_to_ecourse = "<A href=\"" . $ECOURSE_QUERY_COURSE_URL
+                          . "&courseno=" . $$course{id} . "_" . $$course{group}
+                          . "&year=" . $YEAR . "&term=" . $TERM . "\" target=NEW>"
+                          . "連結</A>";
+    
+    my $note_string = "";
+    $note_string = Format_Note_String(%course);
+
+    $note_dis = $note_eng = "";
+    if( $course{distant_learning} == 1 ) {
+      $note_dis = "<FONT color=RED>(本科目為遠距教學課程)";
+    }
+    if( $course{english_teaching} == 1 ) {
+      $note_eng= "<FONT color=RED>(本科目為全英語授課)";
+    }
+    
+    foreach $gro_cour (@gro_cour) {
+#      print("$course{id} eq $$gro_cour{cour_cd}?\n");
+      next if($$gro_cour{gro_no} eq "80");		### 已經不使用的領域 added 20080822
+      if( $course{id} eq $$gro_cour{cour_cd} ) {
+        $note_string .= "<A href=\"" . $CLASS_URL . "Show_All_GRO.cgi\">本課程屬於";
+        $note_string .= $gro_name{$$gro_cour{gro_no}}{gro_name};
+        $note_string .= "</A>";
+      }
+    }
+    
+    print HTML qq(
+      <TR>
+        <TD bgcolor=$bgcolor[$course{grade}]>$fn1$course{grade}</TD>
+        <TD>$fn1$$course{id}</TD>
+        <TD>$fn1$$course{group}</TD>
+        <TD>$fn1$course{cname}<br>$course{ename}<BR>$note_dis $note_eng</TD>
+        <TD>$fn1$teacher_string</TD>
+        <TD align=center>$fn1$course{total_time}<BR>
+            $course{lab_time1}/$course{lab_time2}/$course{lab_time3}</TD>
+        <TD>$fn1$course{credit}</TD>
+        <TD>$fn1$PROPERTY_TABLE[$course{property}]</TD>
+        <TD>$fn1$time_string</TD>
+        <TD>$fn1$classroom{cname}</TD>
+        <TD>$fn1$course{number_limit}</TD>
+        <TD align=CENTER>$fn1$link_to_ecourse</TD>
+        <TD>$fn1$note_string</TD>        
+      </TR>
+    );
+  }
+  print HTML ("</TABLE>");
+  
+  print HTML qq(<P><CENTER><A href="index.html">回上頁</A>);
+  return($exists);
+}
+
+###########################################################################
+sub Format_Note_String()
+{
+  my(%course) = @_;
+  my $note_string = "";
+  my($temp_dept);
+  my(@grade) = ("", "一年級", "二年級", "三年級", "四年級");
+
+#  if( ${$course{prerequisite_course}}[0] ne "" ) {
+#    $note_string .= "先修科目:";
+#    foreach $pre_course (@{$course{prerequisite_course}}) {
+#      %temp_course  = Read_Course($course{dept}, $pre_course, "01","history", "");
+#      $note_string .= "($temp_course{id})$temp_course{cname} ";
+#    }
+#  }
+  if( (${${$course{prerequisite_course}}[0]}{dept} ne "99999") and (${${$course{prerequisite_course}}[0]}{dept} ne "") ) {
+    $note_string .= "<b>先修科目</b>";
+    foreach $pre_course (@{$course{prerequisite_course}}) {
+      %pre_course = Read_Course( $$pre_course{dept}, $$pre_course{id}, "01" ,"history");
+      $note_string = $note_string . "(" . $$pre_course{id} . ")" . $pre_course{cname} . "(" . $GRADE{$$pre_course{grade}} . ")" . " ";
+    }
+    if( $course{prerequisite_logic} and defined(${${$course{prerequisite_course}}[1]}{dept}) ) {
+      $note_string .= "($PREREQUISITE_LOGIC{$course{prerequisite_logic}})";
+    }
+  }
+
+  if ( $course{reserved_number} != 0 ) {
+    $note_string .= "保留新生$course{reserved_number}人; ";
+  }
+  if( ${$course{support_dept}}[0] ne "" ) {
+    $note_string .= "支援";
+    foreach $dept (@{$course{support_dept}}) {
+      %temp_dept = Read_Dept($dept);
+      $note_string .= $temp_dept{cname2};
+    }
+    foreach $grade (@{$course{support_grade}}) {
+      $note_string .= $grade[$grade];
+    }
+    foreach $class (@{$course{support_class}}) {
+      $note_string .= $class;
+      $note_string .= "班";
+    }
+    $note_string .= "; ";
+  }
+  $note_string =~ s/;\s$//;
+  $note_string .= "."  if($note_string =~ /支/);
+  $ban_num = @{$course{ban_dept}};
+  if( ($ban_num > 50) and ( ($SUB_SYSTEM==1)or($SUB_SYSTEM==1)) ) {
+     $note_string .= "限本系生修.";         ### 權宜之計Nidalap,May11,1999
+#     if( $course{dept} !~ /[25].../) {      ### 理, 管院不顯示增加20%給外系文字
+#     $note_string .= "於加退選期間開放供外系選修;";		###  2007/09/21 拿掉
+#     }
+#     $note_string .= $course{note};
+  }
+#  if( $course{distant_learning} == 1 ) {
+#    $note_string .= "本科目為遠距教學課程;";
+#  }
+#  if( $course{english_teaching} == 1 ) {
+#    $note_string .= "本科目為全英語授課;";
+#  }
+  
+  $note_string .= $course{note};
+  return $note_string;
+}
+
+###########################################################################
+sub Dept_Table()
+{
+    my(%exists) = @_;
+
+    my(@Dept)=Find_All_Dept();
+    foreach $gro_name (keys %gro_name) {				###  將跨領域學程視為系所
+      if( $gro_name{$gro_name}{gro_name} ne "" ) {
+#        print("pushing $gro_name ( $gro_name{$gro_name}{gro_name} ) into dept...\n");
+        push(@Dept, $gro_name);
+      }
+    }
+    my($DATA)="";
+    my($Dept1,$Dept2,$Dept3,$Dept4,$Dept5,$Dept6,$Dept7,$Dept0)="";
+
+    $DATA = $DATA . "<table width=90% border=0>\n";
+    $DATA = $DATA . "   <tr><th bgcolor=#99ffff>$fn2文學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2理學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2社會科學學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2工學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2管理學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2法學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2教育學院</th>\n";
+    $DATA = $DATA . "       <th bgcolor=#99ffff>$fn2其他</th>\n";
+    $DATA = $DATA . "	    <th bgcolor=#99ffff>$fn2跨領域學程</th>\n";
+    $DATA = $DATA . "   </tr>\n";
+
+#    $Dept0 .= "<A href=I000.html>";
+#    $Dept0 .= "共同科</A><br>\n";
+
+    foreach $dept (@Dept){
+#      print("now processing dept $dept...\n");
+        if( length($dept) == 2 ) {		###  跨領域學程代碼是兩碼
+          %Dept=("id"=>"$dept", "cname2"=>"$gro_name{$dept}{gro_name}");
+        }else{					###  一般系所代碼是四碼
+          %Dept=Read_Dept($dept);
+        }
+        $link = 1;
+        $link = 0  if( $exists{$dept} == 0 );
+        
+        if( length($dept) == 2 ) {				###  if 跨領域學程
+#          print("adding $dept into Dept8\n");
+          $gro_link = $CLASS_URL . "Show_All_GRO.cgi?gro_no=" . $dept;
+          $Dept8 .= "<A href=$gro_link>$gro_name{$dept}{gro_name}</A><br>\n";
+        }else{							###  else 一般系所
+#          print("adding $dept into dept0~7\n");
+          if( ($Dept{id} == 0) or ($Dept{id} eq "7006") ){
+              $Dept0 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept0 .= $fn2.$Dept{cname2}."</A><br>\n";
+          }else{
+            if( $Dept{id}/1000 >= 7 ){
+              $Dept7 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept7 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 6){
+              $Dept6 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept6 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 5){
+              $Dept5 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept5 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 4){
+              $Dept4 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept4 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 3){
+              $Dept3 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept3 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 2){
+              $Dept2 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept2 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }elsif($Dept{id}/1000 >= 1){
+              $Dept1 .= "<A href=$Dept{id}.html>" if $link;
+              $Dept1 .= $fn2.$Dept{cname2}."</A><br>\n";
+            }
+          }
+        }
+    }
+
+#    $DATA = $DATA ."<tr>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept4."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept2."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept5."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept3."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept1."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept6."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept7."</td>\n";
+#    $DATA = $DATA ."    <td valign=top>".$Dept0."</td>\n";
+#    $DATA = $DATA ."</tr>\n";
+#    $DATA = $DATA . "   </table>\n";
+    
+    $DATA = $DATA ."<tr>\n";
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept1."</td>\n";         # 文
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept2."</td>\n";         # 理
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept3."</td>\n";         # 社
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept4."</td>\n";         # 工
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept5."</td>\n";         # 管
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept6."</td>\n";         # 法
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept7."</td>\n";         # 教
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept0."</td>\n";         # 其他
+    $DATA = $DATA ."    <td valign=top><FONT size=2>".$Dept8."</td>\n";         # 跨領域學程
+    $DATA = $DATA ."</tr>\n";
+    $DATA = $DATA . "   </table>\n";
+
+
+    return($DATA);
+                    
+}
+
+
+

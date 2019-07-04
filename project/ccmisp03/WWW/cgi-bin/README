@@ -1,0 +1,13 @@
+
+   ~/WWW/cgi-bin/
+
+   此目錄內是所有開排選課相關程式
+
+      project/ 內是系所開排課的程式;
+      class/ 內是學生選課的程式;
+      library/ 內放一些程式用到的模組 --> link to  ~/LIB 
+      test/ 內放一些需要在網頁上才能測試的 cgi 程式
+
+                                               李永祥 Sep 28,1998
+                                               陳穎祥 Dec 13,1998
+                                               Ionic  Dec 30,1998

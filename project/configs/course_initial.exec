@@ -1,0 +1,13 @@
+#!/bin/csh
+
+echo "create directory and symbolic links"
+mkdir /ultra2 /home0
+ln -s /NFS/project /ultra2/
+ln -s /NFS/project /home0/
+tar zxvfp apache22.httpd.Includes.tgz -C /usr/local/etc/apache22/Includes/
+tar zxvfp apache22.suexec.options.tgz -C /var/db/ports/apache22/
+
+cat master.passwd.course >> /etc/master.passwd
+vipw
+
+portupgrade -cCvRf apache

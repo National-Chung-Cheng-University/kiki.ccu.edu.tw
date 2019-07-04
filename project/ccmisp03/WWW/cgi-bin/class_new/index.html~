@@ -1,0 +1,17 @@
+<HTML>
+  <META http-equiv="" content="">
+  <META name="DESCRIPTION" content="">
+  <META name="KEYWORDS" content="">
+
+  <HEAD><TITLE>國立中正大學  選課系統</TITLE></HEAD>
+  <FRAMESET cols="220,80%" border=0>
+    <FRAMESET rows="130,80%" border=0>
+      <FRAME src="system_state.php" NAME="system_state">
+      <FRAME src="login.php" NAME="bookmark">
+    </FRAMESET>
+    <FRAMESET rows="120,80%" border=0>
+      <FRAME src="header.html" NAME="header">
+      <FRAME src="announce.php" NAME="basefrm">
+    </FRAMESET>
+  </FRAMESET>
+</HTML>

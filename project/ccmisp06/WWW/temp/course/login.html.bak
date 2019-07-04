@@ -1,0 +1,45 @@
+<HTML>
+<script type="text/javascript" src="acpwd.js"></script>
+<script language="JavaScript">
+//  這一段是從學籍系統的登入網頁抄來的 Added 2005/09/13 Nidalap :D~
+  function f_action(field) {
+	popup_ask_passwd=window.open("http://mis.cc.ccu.edu.tw/academic/lost_passwd.htm", "遺失密碼", "width =600, height =600, scrollbars=yes");
+	popup_ask_passwd.name = "lost_passwd";
+	return true;
+  }
+</SCRIPT>
+
+ <HEAD>
+  <TITLE>LOGIN</TITLE>
+  <BODY>
+
+  <FONT size=2>
+  <CENTER>
+  <FORM action="bookmark.html">
+  <TABLE border=0 width=100%>
+    <TR>
+      <TD><FONT size=2>學號:</TD>
+      <TD>
+        <input class="MyInput" onmouseover="this.className='MyInput2';" onmouseout="this.className='MyInput';"  type="text" name="temp_count" size="12" onkeyup="star();" onBlur="key_end();">&nbsp<input type="hidden" name="usercd">
+      </TD>
+    </TR>
+    <TR>
+      <TD><FONT size=2>密碼:</TD>
+      <TD><INPUT size=10 type=password></TD>
+    </TR>
+    <TR>
+      <TD colspan=2>
+        <FONT size=2>
+        <INPUT type=RADIO name=term checked >95 學年度第 2 學期<BR>
+        <INPUT type=RADIO name=term>95 學年度暑修
+      </TD>
+    </TR>
+    <TR><TD colspan=2><HR></TD></TR>
+    <TR>
+      <TD><INPUT type=submit value="登入系統"></TD>
+      <TD><input type="button" value="遺失密碼" name="bt_lost_passwd" onClick="return f_action(this)"></TD>
+    </TR>
+  </TABLE>
+  </FORM>
+ </BODY>
+</HTML>

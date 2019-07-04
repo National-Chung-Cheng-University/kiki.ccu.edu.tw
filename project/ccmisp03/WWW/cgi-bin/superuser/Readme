@@ -1,0 +1,24 @@
+
+superuser.cgi      管理系統主選單(o.k.)
+
+Teacher_Menu.cgi   教師管理系統主選單
+Add_Teacher.cgi    新增教師
+Frame_Teacher.cgi  提供修改與刪除教師資料功能時的 frame
+Select_Teacher.cgi 提供修改與刪除教師資料時，上面frame選擇顯示系所教師
+Edit_Teacher.cgi   修改與刪除教師時顯示欲修改或刪除之教師資料
+Edit_Teacher2.cgi  修改教師資料或刪除教師資料
+Find_Exceed.cgi    找出超修科目及學生名單(救火用)
+
+ Program By ionic 1999/4/10
+
+註: 以上程式均需要 password 的檢查, 以策安全!
+    目前 password 部份都還沒做...Paladin 請你幫幫忙..thanx
+    含 password 檢查以及教師新增修改刪除時的 password 處理
+
+Dept_Menu.cgi     系所管理系統主選單
+Add_Dept.cgi      新增系所
+Transfer_Course/  必修/必選課轉檔相關功能(Nidalap Jun02,1999)
+Query/            教師查詢修課學生名單(目錄)
+SystemChoose/     系統篩選(目錄)
+Change/           科目異動(目錄) 
+ 

@@ -1,0 +1,57 @@
+    <html>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <link rel="stylesheet" href="http://demos.jquerymobile.com/1.4.3/css/themes/default/jquery.mobile-1.4.3.min.css" />
+      <script src="http://demos.jquerymobile.com/1.4.3/js/jquery.js"></script>
+      <script src="http://demos.jquerymobile.com/1.4.3/js/jquery.mobile-1.4.3.min.js"></script>
+	  
+	  
+	<SCRIPT language="javascript">
+	  $(document).ready(function(){
+		$("#s1").change(function(){
+//		  var s1v = $("#s1").val();
+		  $s2 = $('#s2');
+		  $('#debug_div').html("ccc");
+		  
+//		  $s2.selectmenu({ disabled: true });
+//		  $s2.selectmenu("refresh", true);
+		  
+		  $('#s2 option:selected').remove();
+		  $('#s2').selectmenu('refresh', true);
+
+		});
+	  });
+	</SCRIPT>
+	  
+	  
+	  
+	  
+	  
+      <TITLE>test</TITLE>
+    </head>
+
+    <DIV data-role='page'>
+	  <CENTER>
+	  <DIV data-role='header' data-theme='b'>
+	    <IMG src='../../Graph/mobile/title310px.gif'>
+	  </DIV>
+	  <DIV data-role='content'>
+	  
+    <DIV id='debug_div'>debug msg...</DIV>
+	
+	<P>
+	<FORM>
+	  <select name='s1' id='s1'>
+	    <option value=1>1
+		<option value=2>2
+	  </select>
+	  <P>
+	  
+	  <select name='s2' id='s2'>
+	    <option value=1>1
+		<option value=2>2
+		<option value=3>3
+		<option value=4>4
+	  </select>
+	  
+	</FORM>

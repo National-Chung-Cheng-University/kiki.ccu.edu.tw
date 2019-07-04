@@ -1,0 +1,4 @@
+#!/bin/csh
+
+/bin/cat /dev/null > /var/log/httpd-error.log
+/bin/sync

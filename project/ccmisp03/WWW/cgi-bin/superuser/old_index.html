@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<title>Index</title>
+</HEAD>
+<script language=javascript src="./Classify.js">
+</script>
+
+<script language=javascript>
+function AddWin()
+{
+        win=open("http://kiki.ccu.edu.tw/~ccmisp06/Test/hanchu/AddTeacherWindow.html","openwin","width=200,height=250");
+        win.creator=self;
+        //alert(win.location);
+        //win.moveTo(300,200);
+        //win.focus();
+}
+
+</script>
+<body  bgcolor=white>
+
+<Form name="form1" method=post action="http://kiki.ccu.edu.tw/~ccmisp06/cgi-bin/test/ShowAllValue.cgi">
+<table border=0>
+	<tr>
+		<td rowspan=3>
+			<select name="Teacher" size="4" multiple onblur="isDelete(document.form1.Teacher)">
+			<option value=999 selected>教師未定
+			</select>
+		</td>
+		<td>
+			<input type=button name=btn1 value='新增任課教師' onclick='AddWin()'>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type=button name=btn2 value='移除現任教師' onClick="RemoveWin()">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type=button value="Clear All" onClick="ClearAll(document.form1.Teacher)">
+		</td>
+	</tr>
+	<tr>
+		<td colspan=2>
+			<input type=submit value=" <--------  送出表單  ------->">
+		</td>
+	</tr>
+</table>
+
+
+</Form>
+
+
+</BODY>
+</HTML>

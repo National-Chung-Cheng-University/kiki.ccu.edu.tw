@@ -1,0 +1,24 @@
+#!/bin/sh
+
+/sbin/ipfw add 1000 allow tcp from 127.0.0.1 to any
+/sbin/ipfw add 2000 allow tcp from 140.123.30.0/24 to any
+/sbin/ipfw add 2001 allow tcp from 192.168.100.0/24 to any
+/sbin/ipfw add 2002 allow tcp from 192.168.101.0/24 to any
+/sbin/ipfw add 2003 allow udp from 140.123.30.0/24 to any
+/sbin/ipfw add 2004 allow udp from 192.168.100.0/24 to any
+/sbin/ipfw add 2005 allow udp from 192.168.101.0/24 to any
+/sbin/ipfw add 3000 allow tcp from 140.123.19.0/24 to any
+/sbin/ipfw add 3001 allow tcp from 140.123.29.0/24 to any
+/sbin/ipfw add 3002 allow tcp from 140.123.33.0/24 to any
+#
+/sbin/ipfw add 10000 deny tcp from any to any 111,769,871,980,981,1023,1127 in
+/sbin/ipfw add 10001 deny udp from any to any 111,768,971,980,1012,1014,1015 in
+/sbin/ipfw add 10002 deny tcp from any to any 3306 in
+/sbin/ipfw add 10003 deny tcp from any to any 6000 in
+/sbin/ipfw add 10004 deny tcp from any to any 8009 in
+/sbin/ipfw add 10005 deny tcp from any to any 8000,8180 in
+
+if [ -x /usr/local/squid/sbin/squid ]; then
+	echo "starting reverse proxy daemon"
+	/usr/local/squid/sbin/squid &
+fi

@@ -1,0 +1,48 @@
+<body background="http://kiki.ccu.edu.tw/~ccmisp06/Graph/ccu-sbg.jpg">
+<FONT size=-1>
+<CENTER>
+  <B>測試帳號同學, 歡迎!</B>
+</CENTER>
+<HR>
+
+
+<B>系統公告</B>
+<BR>
+&nbsp&nbsp<A href="announce.html" target=main2>選課系統公告</A>
+<BR>
+&nbsp&nbsp<A href="announce.html" target=main2>系統開放時程</A>
+<BR>
+&nbsp&nbsp選修軍訓課程須知 
+
+<P>
+<B>選課相關</B>
+<BR>
+&nbsp&nbsp<A target="main2" href="Add_Course00.html">加選</A>
+<BR>
+&nbsp&nbsp退選
+<BR>
+&nbsp&nbsp檢視已選修科目
+<BR>
+&nbsp&nbsp檢視篩選公告
+<BR>
+&nbsp&nbsp列印選課單
+<BR>
+&nbsp&nbsp更改密碼
+
+<P>
+<B>資料查詢</B>
+<BR>
+&nbsp&nbsp<A target="main2" href="http://kiki.ccu.edu.tw//user_manual/user_manual.htm">系統操作手冊</A>
+<BR>
+&nbsp&nbsp開課資料查詢
+<BR>
+&nbsp&nbsp課表(.doc檔)
+<BR>
+&nbsp&nbsp<A target="main2" href="http://kiki.ccu.edu.tw/~ccmisp06/cgi-bin/Query/Query_by_time1.cgi">以時間查詢開課資料</A>
+
+
+<P>
+<B>其他系統</B>
+<BR>
+
+

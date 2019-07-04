@@ -1,0 +1,6 @@
+#!/bin/csh
+set web_base="/NFS/project/COURSE/"
+set web_target="/home/COURSE/"
+
+set rsync_opt=" -av --stats --progress --delete "
+/usr/local/bin/rsync $rsync_opt $web_base $web_target

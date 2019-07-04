@@ -1,0 +1,86 @@
+3/30/99 hanchu   已經改好了，應該可以 resize 了，再試試看，不行的話在反應
+                 給我。
+3/29/99 Paladin  大猩猩你的新增任課教師window是不是設定不可resize?
+                 在有些電腦上連 "新增" 的按鈕都show不出來說...  :(
+
+3/28/99 hanchu   ionic 教師分類的 js 部分我已經弄好了..OK!!
+3/28/99 ionic    hanchu 請去幫我加增加授課教師的 js & cgi part
+                 ~/WWW/cgi-bin/project/Open_Course_2.cgi
+                 我自己嘗試去加了...但是出現錯誤
+                 JSCreatTeacher not defined ...
+                 我用 grep 也找不到這個 function 定義在哪裡..
+                 但是你本來的程式可以動..我搬過來就不會動了
+                 還有我的 select name 是 teacher 不是 Teacher
+                 請幫我改一下你的 js 部份(Teacher 改成 teacher)
+                 thanx...
+
+3/17/99 hanchu   老骨灰，妳做了什麼啊，整個 kiki 為什麼都沒空間可以放東西
+                 了啊....，挖ㄌㄟ....還好我有發現....不然寫的東西不就白寫了
+                 把沒用的東西清一清吧....。
+3/16/99 Paladin  陳～～冠～～宇....我恨你!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                 Open_Course2.cgi 寫得什麼爛程式碼!?!!?!?!?!?!?!!?!?!?!?!?
+                 光是copy過來我足足花了兩個小時還沒弄好.........
+                 拜～～～～拖....................%(&$^(&*@$#&^$^
+                 眼精極度花&心情極度%&*#@&^%*@中......
+
+~~>_<~~ 4月15日又要開排課喔.....
+
+
+3/11/99 ionic    現在是清晨 4:50 分.... 我終於把我的部份完成.
+                 (不過還缺教師的部份.. 等待 hanchu )
+                 .... 想起還有管理系統..... @_@
+
+3/10/99 Paladin  1. 對, 修改&列印.
+                 2. Course.pm 兩變數對調回來了 :)
+
+3/10/99 ionic    Paladin 請問你要做的兩個界面是哪兩個呢?
+                 (修改和? 是不是列印? 因為列印跟修改的第一頁很像)
+3/10/99 ionic    Paladin 你的 Course.pm 有小問題
+                 讀出 course 資料存錯了 學分和時數互調
+                 我現在讀出的電工實驗 $course{credit}學分 = 3
+                 $course{total_time}時數=1 ...請更正..謝謝!
+
+3/10/99 hanchu   好咩好咩....不過我們好像已經粉久沒這麼多人同時在站上了喔..
+                 感覺好像又年輕了不少唷.... :p
+3/10/99 Paladin  hanchu請不要耍寶...差點把我們嚇出心臟病.......
+
+3/10/99 hanchu   ionic 你好像把程式的目錄放錯了，開排課的 cgi 程式，
+                 不是應該放在 project 內嗎？你怎麼把他放到 class 中去了
+                 我已經把程式移到 project 中了，在麻煩你把你 cgi 程式中的
+                 相關路徑修改一下吧....。 ^_^
+3/10/99 ionic    有 classindex 有問題
+                 前天我發現 中文系的 classindex 有問題, 都沒有換行
+                 ( 所有科目的科目代碼+年級+班別擠在一行)
+                 中文系我已經手動改了其 classindex 不過改了後
+                 一年級的部份還是有問題, 其他年級都沒問題了
+                 不確定是否其他系所的 classindex 有沒有同樣的問題
+
+3/8/99  Paladin  ionic你說的三件事都已完成:
+                    1.$course{time} 恢復原資料結構
+                    2.歷史資料我co了一份當學期科目抵數 :P
+                    3.Course.pm 在Delete部份修改完成.
+                 Course.pm可能仍有隱藏bug, 有錯誤請隨時回報 :)
+                 當然, 照例, 加薪! CCCcc.c.c.......
+
+3/7/99  ionic    .... 為什麼 Read_Course 傳出來的
+                 $course{time} (科目上課時間)
+                 的資料結構變了... 為什麼呢?....
+                 $course{time} 的處理部份被 # 掉了.. why?
+
+3/7/99  ionic    麻煩請建立歷史科目檔案以供測試使用
+                 目前沒有任何歷史科目..只有本學期已開科目!
+
+3/7/99  ionic    pm 檔中有問題!
+                 delete argument is not a HASH element or slice at
+                 /ultra2/project/ccmisp06/LIB/Course.pm line 193.
+                 請加以更正..謝謝!(目前此行被我 # 掉)
+
+3/5/99  Paladin  給冠魚: Course.pm中新增及修改已完成初步架構,
+                 與規格書有不同處(規格書將做修改):
+                   1. Add_Course()及Change_Course()合併為 Modify_Course(),
+                      輸入參數改為 ($operation, %course),$operation若為
+                      "add"則是新增; 若是"modify"則是修改.
+                   2. $course{time}暫改為一個scalar, 以空白或\t連接之.
+                 詳細測試尚未完成, 有發現bug請回報 :)
+                 又 Delete_Course() 尚未開始做, 預定明天可完成之 :)
+

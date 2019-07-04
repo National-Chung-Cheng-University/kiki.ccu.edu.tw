@@ -1,0 +1,5 @@
+#!/bin/csh
+ls -l ~ccmisp06/WWW/Course/|grep html| \
+grep Dec | \
+awk '{print "lynx -reload -dump \"http://kiki.ccu.edu.tw/~ccmisp06/Course/"$9"\""}' | \
+csh

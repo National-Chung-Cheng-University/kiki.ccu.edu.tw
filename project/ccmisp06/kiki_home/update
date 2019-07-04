@@ -1,0 +1,4 @@
+cp -R ~ccmisp06/kiki_home/* /home/COURSE/
+cp /home/COURSE/system_choose_criteria.* ~ccmisp06/WWW/UserGuide/
+
+rsync ~ccmisp06/DATA/Student.log /home/center/nidalap/

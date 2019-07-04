@@ -1,0 +1,176 @@
+<HTML>
+<HEAD>
+<title>Add Window</title>
+</HEAD>
+
+<script language=javascript src="./Teachers.js">
+</script>
+
+<script language=javascript>
+
+function TeacherSelect(obj)
+{
+	if(creator.document.form1.Teacher.options[0].value == 99999){
+		creator.document.form1.Teacher.options[0].text=obj.member_entity.options[obj.member_entity.selectedIndex].text
+		creator.document.form1.Teacher.options[0].value=obj.member_entity.options[obj.member_entity.selectedIndex].value
+		creator.document.form1.Teacher.options[0].selected=true;
+	}else{
+		var index=creator.document.form1.Teacher.length
+		creator.document.form1.Teacher.length++
+		creator.document.form1.Teacher.options[index].text=obj.member_entity.options[obj.member_entity.selectedIndex].text
+		creator.document.form1.Teacher.options[index].value=obj.member_entity.options[obj.member_entity.selectedIndex].value
+		creator.document.form1.Teacher.options[index].selected=true;
+	}
+}
+
+function LoadData()
+{
+	JSCreatAllTeachers();
+}
+
+function ChangeMemberEntity(class_obj,member_obj)
+{
+	member_obj.length=1;
+	var i=1;
+        var flag=0;
+        
+        member_obj.options[0].text="教師未定";
+        member_obj.options[0].value="99999";
+        member_obj.options[0].selected=true;
+	while(i < Teachers.length )
+	{
+		if(Teachers[i].Dept == class_obj.options[class_obj.selectedIndex].value)
+		{  
+                        flag=1;
+                	member_obj.options[member_obj.length-1].value=Teachers[i].Code;
+			member_obj.options[member_obj.length-1].text=Teachers[i].Name;
+                    if(i==2){
+                        member_obj.options[member_obj.length-1].selected=true;
+                    }
+			member_obj.length=member_obj.length+1;
+		}
+		i++;
+	}
+/*
+        if(flag == 0)
+        {
+           member_obj.options[member_obj.length].text="教師未定";
+           member_obj.options[member_obj.length].value="99999";
+           member_obj.options[member_obj.length].selected=true;
+        }
+*/
+	member_obj.length=member_obj.length-1;
+	focus_flag=false;
+}
+</script>
+
+<body  bgcolor=white onload="JSCreatAllTeachers()">
+<center>
+<Form name=form1>
+
+<Select name="class_entity" onFocus="focus_flag=true;" onChange="ChangeMemberEntity(document.form1.class_entity,document.form1.member_entity)">
+<Option value=0000>請選擇系所
+<Option value=1104>中文系
+<Option value=1106>中文所
+<Option value=1154>外文系
+<Option value=1156>外文所
+<Option value=1204>歷史系
+<Option value=1206>歷史所
+<Option value=1254>哲學系
+<Option value=1256>哲學所
+<Option value=1306>語言所
+<Option value=1356>比較文學所
+<Option value=1406>台文所
+<Option value=2104>數學系
+<Option value=2106>應數所
+<Option value=2156>地震所
+<Option value=2204>物理系
+<Option value=2206>物理所
+<Option value=2254>化學系
+<Option value=2256>化學所
+<Option value=2306>數統所
+<Option value=2316>統科所
+<Option value=2354>地球與環科系
+<Option value=2356>應用地物所
+<Option value=2406>數學所
+<Option value=2456>分子生物所
+<Option value=2504>生科系
+<Option value=2604>化暨生化系
+<Option value=2606>化暨生化所
+<Option value=3104>社福系
+<Option value=3106>社福所
+<Option value=3154>心理系
+<Option value=3156>心理所
+<Option value=3204>勞工系
+<Option value=3206>勞工所
+<Option value=3304>政治系
+<Option value=3306>政治所
+<Option value=3354>傳播系
+<Option value=3356>電傳所
+<Option value=3556>應心所
+<Option value=3656>臨床心理所
+<Option value=4104>資工系
+<Option value=4106>資工所
+<Option value=4154>電機系
+<Option value=4156>電機所
+<Option value=4204>機械系
+<Option value=4206>機械所
+<Option value=4254>化工系
+<Option value=4256>化工所
+<Option value=4304>通工系
+<Option value=4306>通訊所
+<Option value=4406>機電光所
+<Option value=4416>光機電所
+<Option value=4506>生工所
+<Option value=5104>經濟學系
+<Option value=5106>國經所
+<Option value=5154>財金系
+<Option value=5156>財金所
+<Option value=5204>企管系
+<Option value=5206>企管所
+<Option value=5254>會計系
+<Option value=5256>會計所
+<Option value=5304>資管系
+<Option value=5306>資管所
+<Option value=5456>行銷管理所
+<Option value=5556>醫療資訊管理所
+<Option value=5264>會計與資訊科技學系
+<Option value=5266>會計與資訊科技研究所
+<Option value=6054>法律系
+<Option value=6056>法律所
+<Option value=6104>法學組
+<Option value=6154>財經法組
+<Option value=6204>法制組
+<Option value=6304>財法系
+<Option value=6306>財法所
+<Option value=3546>學程中心
+<Option value=7104>成教系
+<Option value=7106>成教所
+<Option value=7156>教育所
+<Option value=7254>犯防系
+<Option value=7256>犯防所
+<Option value=7306>師培中心
+<Option value=7356>休閒教育所
+<Option value=7406>課研所
+<Option value=7506>高齡教育所
+<Option value=7006>通識中心
+<Option value=F000>體育中心
+<Option value=I000>共同科
+<Option value=V000>軍訓室
+
+</select>
+<br>
+
+<Select name="member_entity" size=10>
+<Option value=99999>教師未定
+</select>
+
+<br>
+<input type=button name="sent" value="確定送出" onclick="TeacherSelect(this.form)">
+</Form>
+</center>
+
+</BODY>
+</HTML>
+
+

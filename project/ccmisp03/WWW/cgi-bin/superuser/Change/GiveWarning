@@ -1,0 +1,92 @@
+#!/usr/local/bin/perl
+
+require "../../library/Reference.pm";
+require $LIBRARY_PATH."Dept.pm";
+require $LIBRARY_PATH."Student_Course.pm";
+require $LIBRARY_PATH."Course.pm";
+require $LIBRARY_PATH."Student.pm";
+require $LIBRARY_PATH."Teacher.pm";
+require $LIBRARY_PATH."Classroom.pm";
+require $LIBRARY_PATH."Error_Message.pm";
+
+$week_string="日/一/二/三/四/五/六";
+$time_string="A/1/2/3/4/F/B/5/6/7/8/C/D/E";
+
+$WARNING_PATH=$DATA_PATH."Student_warning/";
+#$WARNING_PATH="./Test/";
+
+@Teachers= Read_Teacher_File();
+@Dept = Find_All_Dept();
+@Students= Find_All_Student();
+my($line,$i);
+
+@Log = Read_All_Changed_Courses();
+$line = (@Log);
+
+for($i=0;$i<$line;$i++)
+{
+ print "Total courses:$line,Handle:$i now\n";
+ if($Log[$i]{flag} ne "A")   ### 非新增科目(科目刪除或更動)
+ {
+  my(@Students,$student);
+  @Students =Student_in_Course($Log[$i]{dept},$Log[$i]{course_id},$Log[$i]{group});
+
+  foreach $student(@Students)
+  {
+#   %student = Read_Student($student);
+#   print "[$student]\n";
+    GiveWarning($student,%{$Log[$i]});
+   if($Log[$i]{flag} eq "C")
+   {
+#    print
+# "退選:$student,$Log[$i]{dept},$Log[$i]{course_id},$Log[$i]{group}\n";
+
+####   下行若去掉 mark 將會使選修已刪除科目的學生退選該科目 ####
+Delete_Student_Course($student,$Log[$i]{dept},$Log[$i]{course_id},$Log[$i]{group});
+   }
+  }
+ }
+}
+
+##### End of Main program #####
+
+sub Read_All_Changed_Courses
+{
+ my(@Log,$line,@Temp,$Temp);
+ open(LOG,"< Output2 ");
+ @Temp = <LOG>;
+ chop(@Temp);
+ foreach $Temp(@Temp)
+ {
+  ($Log[$line]{dept},$temp,$Log[$line]{course_id},$Log[$line]{group},
+   $Log[$line]{cname},$Log[$line]{teacher},$Log[$line]{total_time},
+   $Log[$line]{credit},$Log[$line]{property},$Log[$line]{classtime},
+   $Log[$line]{classroom},$Log[$line]{flag},$Log[$line]{teacher2},
+   $Log[$line]{property2},$Log[$line]{classtime2},
+   $Log[$line++]{classroom2})
+  = split("###",$Temp); 
+ }
+close(LOG);                      
+
+return @Log;
+
+}
+
+##### Begin of sub function GiveWarning #####
+
+sub GiveWarning
+{
+ my($student,%flag,%dept);
+ ($student,%Log) = (@_);
+ $flag{"C"}="取消";
+ $flag{"U"}="更動";
+ %dept = Read_Dept($Log{dept});
+ open(WARNING,">>$WARNING_PATH"."$student"."_change");
+  print WARNING "$flag{$Log{flag}}###";
+  print WARNING "$dept{cname2}###$Log{course_id}###$Log{group}###";
+  print WARNING "$Log{cname}###$Log{teacher}###$Log{property}###";
+  print WARNING "$Log{classtime}###$Log{classroom}###";
+  print WARNING "$Log{teacher2}###$Log{property2}###";
+  print WARNING "$Log{classtime2}###$Log{classroom2}\n";
+ close(WARNING);
+}

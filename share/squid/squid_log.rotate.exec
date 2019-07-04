@@ -1,0 +1,8 @@
+#!/bin/csh
+
+set logdate="`/bin/date +%Y%m%d`"
+sleep 50
+/usr/local/squid/sbin/squid -k rotate
+sleep 300
+mv /usr/local/squid/logs/access.log.0 /usr/local/squid/logs/access.log.$logdate
+bzip2 -9 -f /usr/local/squid/logs/access.log.$logdate

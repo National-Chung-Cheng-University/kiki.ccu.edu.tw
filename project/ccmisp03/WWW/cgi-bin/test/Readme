@@ -1,0 +1,274 @@
+______________________________________________________________________________
+| File Upload Script                Version 6.00                             |
+| Created on 4/8/96                 Last Modified: 01/18/98 13:37            |
+| Scripts Found at:                 http://www.terminalp.com/scripts/        |
+| Copyright 1996 - 1998 By Jeff Carnahan - jeffc@terminalp.com               |
+|____________________________________________________________________________|
+| If you run into any problems while trying to configure this scripts, help  |
+| is available.  The steps you should take to get the fastest results, are:  |
+|       Read this file thoroughly                                            |
+|       Verify you're running the latest version.  Check:                    |
+|          http://www.terminalp.com/scripts/                                 |
+|                                                                            |
+|  I'm sorry, I don't have time to individually answer questions/comments... |
+|____________________________________________________________________________|
+| Copyright (C) 1996-1998 Jeffrey D. Carnahan                                |
+|                                                                            |
+| This program is free software; you can redistribute it and/or modify       |
+| it under the terms of the GNU General Public License as published by       |
+| the Free Software Foundation; either version 2 of the License, or (at      |
+| your option) any later version.                                            |
+|                                                                            |
+| This program is distributed in the hope that it will be useful, but        |
+| WITHOUT ANY WARRANTY; without even the implied warranty of                 |
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU           |
+| General Public License for more details.                                   |
+|                                                                            |
+| A full copy of the GNU General Public License can be retrieved from        |
+| http://www.terminalp.com/scripts/license.shtml                             |
+|                                                                            |
+| - Jeff Carnahan <jeffc@terminalp.com>                                      |
+|____________________________________________________________________________|
+
+This script is to be used to upload files via Netscape Navigator 2.0+'s new
+multipart/form-data MIME type.  Via this MIME type, users can select files
+on their systems to be sent to the server running this CGI-BIN script.  
+There are restrictions on the HTML Forms and what they have to have in them.
+This script is for use with the POST method, (since the file-length is
+unknown). It will work with the GET method, but I *HIGHLY* recommend the
+POST method.  One other thing that you should be familiar with is that this
+script will only work with The Microsoft Internet Explorer if the user has
+installed Microsoft's upgrade, which gives MSIE this feature.  You can
+download the patch for Microsoft Internet Explorer from:
+    http://www.microsoft.com/msdownload/ieplatform/iewin95/04.htm
+
+The script, file-upload.cgi, needs to be placed in your server's cgi-bin and
+the anonymous WWW user must have the ability to read/execute the script.
+
+Setting Up the Upload Script:
+===============================
+
+The file-upload.cgi script does not have to be extensively configured
+to get it to work.  In fact, there is only 1 line you need to manually 
+modify under the file-upload.cgi, script.  First, you must make sure the 
+top line of the script matches the location of you Perl interpreter.
+
+You can find the location of your Perl interpreter on your system, by
+executing the command: 'which perl5' at the UNIX command prompt.  A 
+typical use of this command looks like this:
+
+$ which perl5
+/usr/local/bin/perl5
+$ 
+
+In this case, you have just found that the location of Perl on your system,
+is "/usr/local/bin/perl5".  To update the file-upload.cgi script, you need
+to append this value to '#!'.  So, for this example, the first line of the 
+'new-upload.cgi' script should look like:
+
+#!/usr/local/bin/perl5
+
+*************************************************************************
+        NOTE:        This script MUST use Perl 5+ To Work!
+*************************************************************************
+
+Necessary Variables:
+--------------------
+
+    Finally, to configure the variables, you need to complete the following 
+    steps:
+    
+    1) Type "chmod 755 ./file-upload.cgi" at the UNIX prompt, in the
+	   directory where file-upload.cgi resides. (This makes your script
+	   executable)
+
+    2) You also need to obtain a module called CGI.pm to use this script.
+	   Visit:
+	      http://www-genome.wi.mit.edu/ftp/pub/software/WWW/#installation
+		and download the latest NON-BETA version of the CGI.pm module.
+		
+		(You'll download a compressed file which contains a number of files
+		in addition to CGI.pm  ... All you need to do, is uncompress CGI.pm -
+		the other files aren't necessary - and place it in the same directory
+		as the file-upload.cgi script)
+	
+    3) Type "chmod 644 ./CGI.pm" at the UNIX prompt, in the directory where
+	   file-upload.cgi and CGI.pm reside.  (This makes CGI.pm readable by
+	   the script)
+
+    4) Go into the directory that uploaded files should be placed in.
+	   Type "pwd" at the UNIX prompt, inside this directory.  In response
+	   to your command, you'll be given a path.  This belongs in the scripts
+	   $SAVE_DIRECTORY variable.
+	   
+    5) Go into the directory that uploaded files should be placed in.
+	   Type "chmod 777 ." at the UNIX prompt to make this directory writable
+	   by the CGI script.
+	   
+    6) Configure the script.
+	   A.  Open up the file-upload.cgi script in your favorite text
+	       editor.
+	   B.  Insert the path you obtained in step #4 in the script's
+	       $SAVE_DIRECTORY variable.
+	   C.  Determine the maximum bytes that may be uploaded.  Then
+	       place that numerical value as the $MAXIMUM_UPLOAD variable.
+		   If you do not want to set a limit, set this variable to zero.
+	   D.  If you would like to allow users to upload files that begin
+	       with the word 'index' in the filename, set $ALLOW_INDEX to
+		   one.  To disable this ability, set this variable to zero.
+	   E.  If you would like users redirected to a URL after they have
+	       uploaded their files, place the URL inside the
+		   $SUCCESS_LOCATION variable.  Leaving this variable blank 
+		   results in the CGI script generating a results page for you.
+      
+    7) Upload the script.  Connect to your ISP via FTP, and upload the
+	   script.  YOU MUST BE IN ASCII MODE.  Uploading the script as 
+	   BINARY will cause the script to break.
+	   
+	8) Repeat Step #1.
+	
+	9) Grab a bottle of juice.
+	
+	10) Relish in the thought of uploading files through the WWW.  The 
+	    file-upload.cgi script should now be fully functional.  If not, 
+		restart this process at step 1.
+
+Updating The HTML File:
+------------------------
+    Next comes updating the included HTML file.  This should be simple, as you
+    only need to change one thing to finish the setup.  The part that declares
+    the action of the form tag needs to point to the script on your server.
+    i.e.: if file-upload.cgi can be found with the URL:
+    http://www.myhost.com/cgi-bin/file-upload.cgi
+    then that would be the value to put in this field.
+
+    If you want to integrate the form into one of your own HTML documents,
+    you **!MUST!** follow the following rules:
+
+        1) The Form Tag *SHOULD* be set to the POST method (The Get Method
+           sends information along the URL, which isn't desired if you will
+           be sending any type of binary files, or files longer than ~1 k.
+        
+        2) The Form *MUST* include the ENC-TYPE tag used in the included HTML
+           file.
+
+        3) Remember to set the "upload-file" element to have the type field 
+           set to "file" as well, this informs Netscape Navigator that you
+           will be putting a filename in this input box.
+
+-----------------------------------------------------------------------------
+FAQ's:
+
+   Q: I put the script in my CGI bin directory, but when I access it through
+      the web, it says 'File Not Found'.  What gives?
+   A: Make sure that you are using the proper URL (make sure you spelled
+      everything right, and that the file should indeed exist where you're
+      looking), also make sure that you used the 'chmod 755 ./file-upload.cgi'
+      command on the script.  If this doesn't work, talk with your system
+      administrator.  Your ISP could have a weird setup where your cgi-bin
+      directory doesn't really exist where you suspect it should.. =)
+	  
+   Q: I noticed in the demonstration upload.html page that you can upload
+      four files at once.  Can I upload more than that at the same time?
+   A: Sure.  You can UPLOAD AN UNLIMITED amount of files simultaneously.
+      Simply name the <INPUT TYPE="FILE" .. > fields as:
+	      file-to-upload-[nnnn]
+      [nnnn] represents a sequential number sequence.  For example, to 
+	  upload 10 files at once, use the following field names:
+	  
+	  file-to-upload-1
+	  file-to-upload-2
+	  file-to-upload-3
+	  file-to-upload-4
+	  file-to-upload-5
+	  file-to-upload-6
+	  file-to-upload-7
+	  file-to-upload-8
+	  file-to-upload-9
+	  file-to-upload-10
+	  
+	  To allow only two files to be uploaded at one time, use:
+	  
+	  file-to-upload-1
+	  file-to-upload-2
+
+   Q: When I run the script through the web, I get a 'Server Error'...
+   A: This is most commonly caused by an incorrect configuration.  If
+      possible, try running the script at your UNIX command prompt.  Go
+      into the directory where the script is, and type './file-upload.cgi'
+      and see what happens. Perl should give you some indications as to
+      where the error is occurring.  (This error is also commonly generated
+      when you forget to put the CGI.pm file in the same directory as the
+      file-upload.cgi file. Verify that they are indeed in the same
+      directory.)
+
+   Q: My server runs on Windows NT... Is there any way I can use the File-
+      Upload script?
+   A: Unfortunately, no.  I attempted to port a previous version of the 
+      File Upload! script to Windows NT, however the differences in the file
+	  system proved to much for a single script that would work on both 
+	  Windows NT and Unix.
+
+   Q: Every time I upload a file, the server says it was less than one byte
+      in size, thus it doesn't save the file.  What happened?
+   A: This is a known bug in version 5.02.  Re-download the latest version
+      from http://www.terminalp.com/scripts/  (Version 5.03+)
+
+   Q: When I run the script, I get an error message from Perl.  It says:
+
+         Can't find string terminator "END_OF_AUTOLOAD" anywhere
+         before EOF at CGI.pm line XXX.
+
+         BEGIN failed--compilation aborted at ./file-upload.cgi
+         line XXX.
+
+      How can I fix this?
+   A: Try re-downloading the CGI.pm module from the CGI.pm home page:
+      http://www-genome.wi.mit.edu/ftp/pub/software/WWW/
+	  
+   Q: Where can I get more CGI scripts for free?
+   A: Check out my buddy Matt Wright's Free CGI Resources site.
+      http://www.cgi-resources.com/
+
+   Q: I'm interested in licensing this script, where is the EULA located?
+   A: http://www.terminalp.com/scripts/license.shtml
+      Contact me personally for more information if necessary.
+	  	  
+-----------------------------------------------------------------------------
+
+  Version:  Time Stamp:        History:
+  _______________________________________________________________________
+
+      1.00  04/08/96 00:00     The script was created.
+      1.10  04/23/96 00:00     Added User and Group ID to allow file
+                               changing by the actual user, also updated
+                               a security hole which allowed any user with
+                               the UID of 1376 to own the uploaded files.
+                               Also Updated the INSTALL program and README
+                               files.
+      3.00  05/07/96 00:00     New release with group and user id fixes, it
+                               updates a previously unreleased version (2.0)
+      3.10  05/10/96 00:00     Stupid Typo in script fixed, it was
+                               causing problems for some users.
+      4.00  08/04/96 23:16     Security hole regarding '../' paths
+                               fixed.  Thanks to: Rus Berrett.  Mime
+                               type error fixed.  Thanks to: Bob Stewart.
+      4.01  08/07/96 11:20     Typo fixed in &NoOpen.  Thanks to Marco
+                               Dings.
+      5.00  10/06/96 21:42     Fully rewrote script around CGI.pm library.
+                               As soon as I get the time, I'll write more
+                               features into it, but for now, this version
+                               is stable (to the best of my knowledge).
+      5.01  02/09/97 12:41     Fixed some typo's, and added support for
+                               Netscape Communicator.
+      5.02  05/07/97 15:37     Fixed a possible binary file uploading,
+                               added easier support for NT, and fixed
+                               documentation problems. Added the FAQ.
+      5.03  06/19/97 17:30     Fixed a bug which resulted in all files
+                               appearing to be less than one byte in
+                               size, thus uploads weren't saved.
+	  6.00  01/18/98 13:37     Overhauled script, removed NT support.  Added
+	                           multiple file upload capability, improved 
+							   documentation.
+-----------------------------------------------------------------------------
+Jeff Carnahan - (jeffc@terminalp.com) - http://www.terminalp.com/scripts/
